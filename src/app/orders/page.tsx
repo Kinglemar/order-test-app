@@ -1,26 +1,31 @@
 "use client";
 import NextLink from "next/link";
-import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function Home() {
   const [orders, setorders] = useState<
-    { OrderID: string; TotalAmount: number; OrderDate: string }[]
+    { orderId: string; totalAmount: number; orderDate: string }[]
   >([]);
 
-  const getorders = async () => {
-    try {
-      const response = await axios.get(
-        "http://localhost:44000/v1/parcels/get-test-orders?limit=20"
-      );
-      setorders(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  //Mock a test
 
+  const workerRef = useRef<Worker | null>(null);
   useEffect(() => {
-    getorders();
+    workerRef.current = new Worker(
+      new URL("../workers/orderEvents.ts", import.meta.url)
+    );
+
+    workerRef.current.onmessage = (event) => {
+      if (event.data.type === "ORDERS-LIST") {
+        setorders(event.data.payload);
+      }
+
+      if (event.data.type === "ERROR") {
+        console.error(event.data.payload);
+      }
+    };
+
+    workerRef.current.postMessage({ type: "START_POLLING" });
   }, []);
   return (
     <section>
@@ -39,9 +44,9 @@ export default function Home() {
       <section className="mt-24 mx-auto max-w-4xl">
         <h1>Data</h1>
         {orders?.map((order) => (
-          <div key={order.OrderID} className="border p-3 my-3 rounded-3xl">
-            <p>Amount paid: {order?.TotalAmount}</p>
-            <p>Date Ordered: {order.OrderDate}</p>
+          <div key={order.orderId} className="border p-3 my-3 rounded-3xl">
+            <p>Amount paid: {order?.totalAmount}</p>
+            <p>Date Ordered: {order.orderDate}</p>
           </div>
         ))}
       </section>

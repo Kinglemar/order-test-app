@@ -20,8 +20,9 @@ export default function Home() {
   const getUsers = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:44000/v1/parcels/get-test-users?limit=20"
+        "https://order-backend-3l4l.onrender.com/v1/parcels/get-test-users?limit=20"
       );
+      // console.log(response.data);
       setUsers(response.data);
     } catch (error) {
       console.error(error);
@@ -32,11 +33,10 @@ export default function Home() {
     try {
       console.log({ reqBody: newUser });
       const response = await axios.post(
-        "http://localhost:44000/v1/parcels/create-test-users",
+        "https://order-backend-3l4l.onrender.com/v1/parcels/create-test-users",
         newUser
       );
 
-      console.log(response);
       setUsers((prev) => [response.data, ...prev]);
     } catch (error) {
       console.error(error);
@@ -46,6 +46,7 @@ export default function Home() {
   useEffect(() => {
     getUsers();
   }, []);
+
   return (
     <section>
       <nav>
@@ -65,23 +66,25 @@ export default function Home() {
           className="p-5 max-w-sm bg-slate-300 flex flex-col gap-3"
           method="post"
         >
-          <label htmlFor="name">Name</label>
+          <label htmlFor="name">name</label>
           <input
             onChange={(e) =>
               setNewUser((el) => {
                 return { ...el, name: e.target.value };
               })
             }
+            id="name"
             name="name"
             type="text"
           />
-          <label htmlFor="email">Email</label>
+          <label htmlFor="email">email</label>
           <input
             onChange={(e) =>
               setNewUser((el) => {
                 return { ...el, email: e.target.value };
               })
             }
+            id="email"
             name="email"
             type="email"
           />
@@ -97,8 +100,8 @@ export default function Home() {
         {users?.map((user) => (
           <div key={user.email} className="border p-3 my-3 rounded-3xl">
             <p className="text-end">User ID: {user?.customerId}</p>
-            <p>Name: {user?.name}</p>
-            <p>Email: {user.email}</p>
+            <p>name: {user?.name}</p>
+            <p>email: {user.email}</p>
           </div>
         ))}
       </section>
